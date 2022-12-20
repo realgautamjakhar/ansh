@@ -1,39 +1,58 @@
 import "./App.css";
 import { useState, useRef } from "react";
 import _ from "lodash";
-
-const data = [
-  {
-    imgUrl:
-      "https://images.unsplash.com/photo-1655976796204-308e6f3deaa8?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80",
-  },
-  {
-    imgUrl:
-      "https://images.unsplash.com/photo-1640972040132-28b62b6b3718?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1632&q=80",
-  },
-  {
-    imgUrl:
-      "https://images.unsplash.com/photo-1615503340408-006f2de60a05?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80",
-  },
-];
-
+import { useEffect } from "react";
+const imageTypeRegex = /image\/(png|jpg|jpeg)/gm;
 function App() {
-  const [image, setimage] = useState([]);
+  const [imageFiles, setImageFiles] = useState([]);
+  const [images, setImages] = useState([]);
   const filePicekerRef = useRef();
 
+  //Onchange event on file input
   function handleFilePreview(e) {
-    const reader = new FileReader();
-    const selectedFile = e.target.files[0];
-    if (selectedFile) {
-      reader.readAsDataURL(selectedFile);
+    const { files } = e.target; // fetching all the files
+    const validImageFiles = []; // Storing all the the file to this variable
+
+    //Looping through all the image and validate all the images (Avoid regex use input field validation)
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+
+      //If Validated file added to the validImages files
+      if (file.type.match(imageTypeRegex)) {
+        validImageFiles.push(file);
+      }
     }
-    reader.onload = (readerEvent) => {
-      setimage(readerEvent.target.result);
-    };
+
+    //If Valid Files exist add to use variable
+    if (validImageFiles.length) {
+      setImageFiles(validImageFiles);
+      return;
+    }
+    alert("Selected images are not of valid type!");
   }
-  function removePreview() {
-    setimage(null);
-  }
+
+  //Useeffect with dependance to the usestate
+  useEffect(() => {
+    const images = [],
+      fileReaders = [];
+    if (imageFiles.length) {
+      imageFiles.forEach((file) => {
+        const fileReader = new FileReader();
+        //Reading file location to generate preview
+        fileReaders.push(fileReader);
+        fileReader.onload = (e) => {
+          const { result } = e.target;
+          if (result) {
+            images.push(result);
+          }
+          if (images.length === imageFiles.length) {
+            setImages(images);
+          }
+        };
+        fileReader.readAsDataURL(file);
+      });
+    }
+  }, [imageFiles]);
 
   return (
     <div
@@ -43,71 +62,122 @@ function App() {
         display: "grid",
         placeContent: "center",
         maxWidth: "800px",
+        marginTop: "2rem",
         margin: "auto",
-        marginTop: "1rem",
       }}
     >
-      <input
-        type="text"
-        name="title"
-        id="title"
-        className="input-field"
-        placeholder="Blog's Title"
-      />
-      <textarea
-        name="content"
-        id="content"
-        cols="30"
-        rows="10"
-        placeholder="About Blog"
+      <div
         style={{
-          background: "none",
-          border: "none",
-          fontSize: "1rem",
-          width: "100%",
-        }}
-      ></textarea>
-      <ul
-        style={{
-          listStyle: "none",
-          display: "grid",
-          placeContent: "center",
-          width: "100%",
-          padding: "0",
+          margin: "1rem",
         }}
       >
-        {data?.map((img, index) => {
-          return (
-            <li key={index}>
-              <img src={img.imgUrl} width="100%" alt="" />
-            </li>
-          );
-        })}
-      </ul>
-      <input
-        ref={filePicekerRef}
-        accept="image/*, video/*"
-        onChange={handleFilePreview}
-        type="file"
-        hidden
-        multiple
-      />
+        <input
+          type="text"
+          name="title"
+          id="title"
+          className="input-field"
+          style={{
+            fontSize: "2rem",
+            border: "none",
+            background: "transparent",
+            outline: "none",
+            width: "100%",
+            marginBottom: "2rem",
+          }}
+          placeholder="Blog's Title"
+        />
+        <textarea
+          name="content"
+          id="content"
+          cols="40"
+          rows="20"
+          placeholder="About Blog"
+          style={{
+            background: "none",
+            border: "none",
+            fontSize: "1rem",
+            width: "100%",
+            backgroundColor: "#F1F6F5",
+            outline: "none",
+          }}
+        />
+        <input
+          ref={filePicekerRef}
+          accept="image/*, video/*"
+          onChange={handleFilePreview}
+          type="file"
+          hidden
+          multiple
+        />
 
-      {image != null && <img src={image} width="100%" alt="" />}
+        {images.length > 0 ? (
+          <>
+            <p>Uploaded Images</p>
 
-      <div className="uploadBtn">
-        <div className="file-control-btns">
+            <ul
+              style={{
+                listStyle: "none",
+                padding: "0",
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill,minmax(auto,240px))",
+                gap: "1rem",
+                placeContent: "center",
+              }}
+            >
+              {images.map((image, idx) => {
+                return (
+                  <li key={idx}>
+                    <img
+                      src={image}
+                      alt=""
+                      style={{
+                        objectFit: "cover",
+                        height: "150px",
+                      }}
+                      className="image-hover"
+                      width="100%"
+                    />
+                  </li>
+                );
+              })}
+            </ul>
+          </>
+        ) : null}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            width: "100%",
+            marginTop: "2rem",
+          }}
+        >
           <button
             className="btn"
+            style={{
+              fontSize: "1rem",
+              padding: ".5rem 2rem",
+              border: "none",
+              background: "#6D67E4",
+              color: "white",
+              borderRadius: "50px",
+            }}
             onClick={() => filePicekerRef.current.click()}
           >
             Choose
           </button>
-          <button className="btn" onClick={removePreview}>
-            x
+          <button
+            style={{
+              fontSize: "1rem",
+              padding: ".5rem 2rem",
+              border: "none",
+              background: "#6D67E4",
+              color: "white",
+              borderRadius: "50px",
+            }}
+          >
+            Save
           </button>
         </div>
-        <button>Upload Image</button>
       </div>
     </div>
   );
