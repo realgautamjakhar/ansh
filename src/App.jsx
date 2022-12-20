@@ -18,7 +18,7 @@ const data = [
 ];
 
 function App() {
-  const [image, setImage] = useState();
+  const [image, setimage] = useState([]);
   const filePicekerRef = useRef();
 
   function handleFilePreview(e) {
@@ -28,18 +28,24 @@ function App() {
       reader.readAsDataURL(selectedFile);
     }
     reader.onload = (readerEvent) => {
-      setImage(readerEvent.target.result);
-      console.log(readerEvent.target.result);
+      setimage(readerEvent.target.result);
     };
   }
   function removePreview() {
-    setImage(null);
+    setimage(null);
   }
 
   return (
     <div
       className="App"
-      style={{ listStyle: "none", display: "grid", placeContent: "center" }}
+      style={{
+        listStyle: "none",
+        display: "grid",
+        placeContent: "center",
+        maxWidth: "800px",
+        margin: "auto",
+        marginTop: "1rem",
+      }}
     >
       <input
         type="text"
@@ -48,19 +54,32 @@ function App() {
         className="input-field"
         placeholder="Blog's Title"
       />
+      <textarea
+        name="content"
+        id="content"
+        cols="30"
+        rows="10"
+        placeholder="About Blog"
+        style={{
+          background: "none",
+          border: "none",
+          fontSize: "1rem",
+          width: "100%",
+        }}
+      ></textarea>
       <ul
-        style={{ listStyle: "none", display: "grid", placeContent: "center" }}
+        style={{
+          listStyle: "none",
+          display: "grid",
+          placeContent: "center",
+          width: "100%",
+          padding: "0",
+        }}
       >
         {data?.map((img, index) => {
           return (
-            <li>
-              <img
-                src={img.imgUrl}
-                width="100%"
-                style={{ maxWidth: "800px" }}
-                alt=""
-                key={index}
-              />
+            <li key={index}>
+              <img src={img.imgUrl} width="100%" alt="" />
             </li>
           );
         })}
@@ -71,11 +90,10 @@ function App() {
         onChange={handleFilePreview}
         type="file"
         hidden
+        multiple
       />
 
-      {image != null && (
-        <img src={image} style={{ maxWidth: "800px" }} alt="" />
-      )}
+      {image != null && <img src={image} width="100%" alt="" />}
 
       <div className="uploadBtn">
         <div className="file-control-btns">
