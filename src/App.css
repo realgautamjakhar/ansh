@@ -1,0 +1,36 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+.uploadBtn{
+  margin-top: 2rem;
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  gap: 2rem;
+}
+.blog-title{
+  font-size: 2rem;
+}
+.input-field{
+font-size: 2rem;
+border: none;
+background: transparent;
+outline: none;
+width: 100%;
+margin-bottom: 2rem;
+}
+.file-control-btns{
+  display: flex;
+  gap: 1rem;
+}
+
+button{
+  font-size: large;
+  padding: .75rem 1.5rem;
+  border-radius: 1rem;
+  border: none;
+  background: #6D67E4;
+  color: white;
+}
